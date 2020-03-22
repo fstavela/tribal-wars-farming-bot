@@ -1,0 +1,26 @@
+# Ignore all
+*
+
+# Unignore all dirs
+!*/
+
+# Unignore self and README
+!*.gitignore
+!README.md
+
+# Unignore Python files
+!*.py
+
+# Unignore requirements
+!requirements.txt
+
+# Ignore PyCharm and temporary files
+.idea/
+__pycache__/
+
+# Ignore virtual enviroments
+venv/
+
+# Temporary
+main.py
+
