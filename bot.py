@@ -35,26 +35,38 @@ class Bot:
         place_element = WebDriverWait(self.browser, 10).until(EC.element_to_be_clickable((By.XPATH, xpath)))
         place_element.click()
 
+        self.place = True
+
     def attack_village(self, coords, troops):
         if not self.logged:
             raise Exception("Bot is not logged in")
+        if not self.place:
+            self.go_to_place()
+
+        # Set coordinates value
         xpath = "//div[@id='place_target']/input"
         coords_element = self.browser.find_element_by_xpath(xpath)
         coords_element.send_keys(coords)
         sleep(randint(4, 10) / 10)
 
+        # Set troops values for all troop types
         for key, value in troops.items():
             xpath = f"//input[@id='unit_input_{key}']"
             army_element = self.browser.find_element_by_xpath(xpath)
             army_element.send_keys(value)
             sleep(randint(4, 10) / 10)
 
+        # Click on the "Attack" button on the place page
         xpath = "//input[@id='target_attack']"
         button_element = self.browser.find_element_by_xpath(xpath)
         button_element.click()
         sleep(randint(15, 25) / 10)
 
+        # Click on the "Attack button on the confirmation page
         xpath = "//input[contains(@class, 'btn-attack')]"
         attack_element = WebDriverWait(self.browser, 10).until(EC.element_to_be_clickable((By.XPATH, xpath)))
         attack_element.click()
         sleep(randint(15, 25) / 10)
+
+    def __del__(self):
+        self.browser.quit()
