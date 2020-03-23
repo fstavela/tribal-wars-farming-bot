@@ -28,7 +28,33 @@ class Bot:
 
         self.logged = True
 
-    def go_to_place(self, village_id):
+    def go_to_place(self):
+        if not self.logged:
+            raise Exception("Bot is not logged in")
         xpath = "//div[contains(@class, 'visual-label-place')]"
         place_element = WebDriverWait(self.browser, 10).until(EC.element_to_be_clickable((By.XPATH, xpath)))
         place_element.click()
+
+    def attack_village(self, coords, troops):
+        if not self.logged:
+            raise Exception("Bot is not logged in")
+        xpath = "//div[@id='place_target']/input"
+        coords_element = self.browser.find_element_by_xpath(xpath)
+        coords_element.send_keys(coords)
+        sleep(randint(4, 10) / 10)
+
+        for key, value in troops.items():
+            xpath = f"//input[@id='unit_input_{key}']"
+            army_element = self.browser.find_element_by_xpath(xpath)
+            army_element.send_keys(value)
+            sleep(randint(4, 10) / 10)
+
+        xpath = "//input[@id='target_attack']"
+        button_element = self.browser.find_element_by_xpath(xpath)
+        button_element.click()
+        sleep(randint(15, 25) / 10)
+
+        xpath = "//input[contains(@class, 'btn-attack')]"
+        attack_element = WebDriverWait(self.browser, 10).until(EC.element_to_be_clickable((By.XPATH, xpath)))
+        attack_element.click()
+        sleep(randint(15, 25) / 10)
