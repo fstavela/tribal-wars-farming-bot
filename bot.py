@@ -53,7 +53,7 @@ class Bot:
         for key, value in troops.items():
             xpath = f"//input[@id='unit_input_{key}']"
             army_element = self.browser.find_element_by_xpath(xpath)
-            army_element.send_keys(value)
+            army_element.send_keys(str(value))
             sleep(randint(4, 10) / 10)
 
         # Click on the "Attack" button on the place page

@@ -1,5 +1,9 @@
+import yaml
 from bot import Bot
 
+file = open("villages.yaml")
+farming_data = yaml.safe_load(file)
+file.close()
 
 file = open("driver_path.txt")
 driver = file.readline().strip()
@@ -9,15 +13,11 @@ file = open("profile_path.txt")
 path = file.readline().strip()
 file.close()
 
-file = open("coords.txt")
-coordinates = list(map(str.strip, file.readlines()))
-file.close()
-
-troops = {"spy": "1", "light": "1"}
-
 bot = Bot(driver, path)
 bot.login("https://www.divoke-kmene.sk/")
 bot.go_to_place()
-for coords in coordinates:
-    if coords:
-        bot.attack_village(coords, troops)
+
+for key, value in farming_data["villages"].items():
+    if "troops" not in value.keys():
+        value["troops"] = farming_data["default"]["troops"]
+    bot.attack_village(key, value["troops"]["preferred"])
