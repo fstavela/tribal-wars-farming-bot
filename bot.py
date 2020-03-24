@@ -31,6 +31,7 @@ class Bot:
     def go_to_place(self):
         if not self.logged:
             raise Exception("Bot is not logged in")
+
         xpath = "//div[contains(@class, 'visual-label-place')]"
         place_element = WebDriverWait(self.browser, 10).until(EC.element_to_be_clickable((By.XPATH, xpath)))
         place_element.click()
@@ -38,10 +39,10 @@ class Bot:
         self.place = True
 
     def attack_village(self, coords, troops):
-        if not self.logged:
-            raise Exception("Bot is not logged in")
         if not self.place:
             self.go_to_place()
+        if not self.has_enough_troops(troops):
+            raise Exception("Doesn't have enough troops")
 
         # Set coordinates value
         xpath = "//div[@id='place_target']/input"
@@ -67,6 +68,19 @@ class Bot:
         attack_element = WebDriverWait(self.browser, 10).until(EC.element_to_be_clickable((By.XPATH, xpath)))
         attack_element.click()
         sleep(randint(15, 25) / 10)
+
+    def has_enough_troops(self, troops):
+        if not self.place:
+            self.go_to_place()
+
+        for key, value in troops.items():
+            xpath = f"//a[@id='units_entry_all_{key}']"
+            amount_element = self.browser.find_element_by_xpath(xpath)
+            amount = int(amount_element.text.strip("() \n"))
+            if amount < int(value):
+                return False
+
+        return True
 
     def __del__(self):
         self.browser.quit()

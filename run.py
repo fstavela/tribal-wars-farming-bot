@@ -20,4 +20,7 @@ bot.go_to_place()
 for key, value in farming_data["villages"].items():
     if "troops" not in value.keys():
         value["troops"] = farming_data["default"]["troops"]
-    bot.attack_village(key, value["troops"]["preferred"])
+    if bot.has_enough_troops(value["troops"]["preferred"]):
+        bot.attack_village(key, value["troops"]["preferred"])
+    elif bot.has_enough_troops(value["troops"]["required"]):
+        bot.attack_village(key, value["troops"]["required"])
