@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 from time import sleep
 from random import randint
 
@@ -32,6 +33,10 @@ class Bot:
         if not self.logged:
             raise Exception("Bot is not logged in")
 
+        # Check for captcha
+        if self._element_exists("//div[@id='bot_check']"):
+            sleep(300)
+
         xpath = "//div[contains(@class, 'visual-label-place')]"
         place_element = WebDriverWait(self.browser, 10).until(EC.element_to_be_clickable((By.XPATH, xpath)))
         place_element.click()
@@ -43,6 +48,12 @@ class Bot:
             self.go_to_place()
         if not self.has_enough_troops(troops):
             raise Exception("Doesn't have enough troops")
+
+        # Check for captcha
+        if self._element_exists("//div[@id='bot_check']"):
+            sleep(300)
+
+        self._clear_troops_inputs()
 
         # Set coordinates value
         xpath = "//div[@id='place_target']/input"
@@ -63,11 +74,24 @@ class Bot:
         button_element.click()
         sleep(randint(15, 25) / 10)
 
+        # Check for captcha
+        if self._element_exists("//div[@id='bot_check']"):
+            sleep(300)
+
+        # Check for error
+        if self._element_exists("//div[@class='error_box']"):
+            xpath = "//div[@class='village-item']"
+            if self._element_exists(xpath):
+                self.browser.find_element_by_xpath(xpath).click()
+            return False
+
         # Click on the "Attack button on the confirmation page
         xpath = "//input[contains(@class, 'btn-attack')]"
         attack_element = WebDriverWait(self.browser, 10).until(EC.element_to_be_clickable((By.XPATH, xpath)))
         attack_element.click()
         sleep(randint(15, 25) / 10)
+
+        return True
 
     def has_enough_troops(self, troops):
         if not self.place:
@@ -81,6 +105,20 @@ class Bot:
                 return False
 
         return True
+
+    def _element_exists(self, xpath):
+        try:
+            self.browser.find_element_by_xpath(xpath)
+        except NoSuchElementException:
+            return False
+        return True
+
+    def _clear_troops_inputs(self):
+        fields = self.browser.find_elements_by_xpath("//input[@class='unitsInput']")
+        for field in fields:
+            if field.get_property("value"):
+                field.clear()
+                sleep(randint(4, 10) / 10)
 
     def __del__(self):
         self.browser.quit()
