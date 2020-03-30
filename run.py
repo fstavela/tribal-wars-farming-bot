@@ -18,7 +18,7 @@ bot.login("https://www.divoke-kmene.sk/")
 bot.go_to_place()
 
 for key, value in farming_data["villages"].items():
-    if "troops" not in value.keys():
+    if value.keys() is not None and "troops" not in value.keys():
         value["troops"] = farming_data["default"]["troops"]
     if bot.has_enough_troops(value["troops"]["preferred"]):
         bot.attack_village(key, value["troops"]["preferred"])

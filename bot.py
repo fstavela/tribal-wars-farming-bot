@@ -34,8 +34,8 @@ class Bot:
             raise Exception("Bot is not logged in")
 
         # Check for captcha
-        if self._element_exists("//div[@id='bot_check']"):
-            sleep(300)
+        while self._element_exists("//div[@id='bot_check']"):
+            sleep(10)
 
         xpath = "//div[contains(@class, 'visual-label-place')]"
         place_element = WebDriverWait(self.browser, 10).until(EC.element_to_be_clickable((By.XPATH, xpath)))
@@ -50,8 +50,8 @@ class Bot:
             raise Exception("Doesn't have enough troops")
 
         # Check for captcha
-        if self._element_exists("//div[@id='bot_check']"):
-            sleep(300)
+        while self._element_exists("//div[@id='bot_check']"):
+            sleep(10)
 
         self._clear_troops_inputs()
 
@@ -75,8 +75,8 @@ class Bot:
         sleep(randint(15, 25) / 10)
 
         # Check for captcha
-        if self._element_exists("//div[@id='bot_check']"):
-            sleep(300)
+        while self._element_exists("//div[@id='bot_check']"):
+            sleep(10)
 
         # Check for error
         if self._element_exists("//div[@class='error_box']"):
