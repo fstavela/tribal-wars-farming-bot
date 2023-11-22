@@ -1,4 +1,6 @@
 from selenium import webdriver
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -10,7 +12,11 @@ from random import randint
 class Bot:
     def __init__(self, gecko_path, profile_path=None):
         profile = webdriver.FirefoxProfile(profile_path) if profile_path else webdriver.FirefoxProfile()
-        self.browser = webdriver.Firefox(executable_path=gecko_path, firefox_profile=profile)
+        service = Service(executable_path=gecko_path)
+        options = Options()
+        options.add_argument("-profile")
+        options.add_argument(profile.path)
+        self.browser = webdriver.Firefox(service=service, options=options)
         self.place = False
         self.logged = False
 
@@ -57,20 +63,20 @@ class Bot:
 
         # Set coordinates value
         xpath = "//div[@id='place_target']/input"
-        coords_element = self.browser.find_element_by_xpath(xpath)
+        coords_element = self.browser.find_element("xpath", xpath)
         coords_element.send_keys(coords)
         sleep(randint(4, 10) / 10)
 
         # Set troops values for all troop types
         for key, value in troops.items():
             xpath = f"//input[@id='unit_input_{key}']"
-            army_element = self.browser.find_element_by_xpath(xpath)
+            army_element = self.browser.find_element("xpath", xpath)
             army_element.send_keys(str(value))
             sleep(randint(4, 10) / 10)
 
         # Click on the "Attack" button on the place page
         xpath = "//input[@id='target_attack']"
-        button_element = self.browser.find_element_by_xpath(xpath)
+        button_element = self.browser.find_element("xpath", xpath)
         button_element.click()
         sleep(randint(15, 25) / 10)
 
@@ -82,7 +88,7 @@ class Bot:
         if self._element_exists("//div[@class='error_box']"):
             xpath = "//div[@class='village-item']"
             if self._element_exists(xpath):
-                self.browser.find_element_by_xpath(xpath).click()
+                self.browser.find_element("xpath", xpath).click()
             return False
 
         # Click on the "Attack button on the confirmation page
@@ -97,9 +103,13 @@ class Bot:
         if not self.place:
             self.go_to_place()
 
+        # Check for captcha
+        while self._element_exists("//div[@id='bot_check']"):
+            sleep(10)
+
         for key, value in troops.items():
             xpath = f"//a[@id='units_entry_all_{key}']"
-            amount_element = self.browser.find_element_by_xpath(xpath)
+            amount_element = self.browser.find_element("xpath", xpath)
             amount = int(amount_element.text.strip("() \n"))
             if amount < int(value):
                 return False
@@ -108,13 +118,13 @@ class Bot:
 
     def _element_exists(self, xpath):
         try:
-            self.browser.find_element_by_xpath(xpath)
+            self.browser.find_element("xpath", xpath)
         except NoSuchElementException:
             return False
         return True
 
     def _clear_troops_inputs(self):
-        fields = self.browser.find_elements_by_xpath("//input[@class='unitsInput']")
+        fields = self.browser.find_elements("xpath", "//input[@class='unitsInput']")
         for field in fields:
             if field.get_property("value"):
                 field.clear()
